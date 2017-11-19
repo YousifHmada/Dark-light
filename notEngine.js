@@ -29,10 +29,13 @@ eventsListener.on('message', (channel, message)=>{
 		message = "user with id = " + senderId + " made some stuff!";
 		redisClient.getUserConnection(receiverId)
 			.then((socketId)=>{
-				redisClient.publish('notifications_parsed', JSON.stringify({
-					results : [socketId],
-					message
-				}));
+				console.log(socketId);
+				if(socketId != null){
+					redisClient.publish('notifications_parsed', JSON.stringify({
+						results : [socketId],
+						message
+					}));
+				}
 			}).catch();
 	}
 
@@ -58,15 +61,19 @@ eventsListener.on('message', (channel, message)=>{
 		let senderId = data.body.senderId;
 		let receiverIds = data.body.receiverIds;
 		message = "user with id = " + senderId + " made some stuff!";
-		receiverIds.forEach((receiverId)=>{
-			redisClient.getUserConnection(receiverId)
-			.then((socketId)=>{
-				redisClient.publish('notifications_parsed', JSON.stringify({
-					results : [socketId],
-					message
-				}));
-			}).catch();
-		});
+		Promise.all(receiverIds.map((receiverId)=>{
+			return redisClient.getUserConnection(receiverId);
+		}))
+		.then((dataArray)=>{
+			return dataArray.filter((socketId)=>{
+				if(socketId != null)return true;
+			});
+		}).then((results)=>{
+			redisClient.publish('notifications_parsed', JSON.stringify({
+				results : results,
+				message
+			}));
+		}).catch();
 	}
 });
 

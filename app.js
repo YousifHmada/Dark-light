@@ -19,7 +19,6 @@ eventsListener.on('message', (channel, message)=>{
 		let results = JSON.parse(message);
 		message = results.message;
 		results = results.results;
-		console.log(sockets.length);
 		results.forEach((socketId)=>{
 			sockets[socketId].emit('notifications', message);
 		});
