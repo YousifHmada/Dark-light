@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+</head>
+<body>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript">
+		var socket = io();
+		socket.on('connection', function(socketId){
+			console.log(socketId);
+		});
+		socket.on('notifications', function(message){
+			console.log(message);
+		});
+	</script>
+</body>
+</html>
