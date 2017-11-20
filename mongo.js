@@ -45,15 +45,30 @@ MongoClient.connect(config.mongodb.url, function(err, db) {
     Mongodb.user = {};
 
     Mongodb.user.isNotificationsAllowed = (id)=>{
-            let query = {_id: ObjectId(id), notificationsAllowed: true}
+            if(!ObjectId.isValid(id))return Promise.reject('id is invalid');
+            let query = {_id: ObjectId(id), notificationsAllowed: true};
             return new Promise((resolve, reject)=>{
-                var cursor = db.collection(UsersCollection).findOne(query, (err, doc)=>{
+                db.collection(UsersCollection).findOne(query, (err, doc)=>{
                     if(err != null)console.log(err),resolve(false);
                     if(doc == null)resolve(false);
                     resolve(true);
                 });
             });
     };
+
+    Mongodb.user.getFriends = (id)=>{
+        if(!ObjectId.isValid(id))return Promise.reject('id is invalid');
+        let query = {_id: ObjectId(id)};
+        let projection = {_id:0, friends:1};
+        return new Promise((resolve, reject)=>{
+            db.collection(UsersCollection).findOne(query, projection, (err, doc)=>{
+                if(err != null)console.log(err),resolve(false);
+                if(doc.friends == null)resolve({friends: []});
+                resolve(doc);
+            });
+        });
+    };
+
 });
 
 module.exports = {Mongodb};
