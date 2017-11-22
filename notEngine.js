@@ -2,6 +2,8 @@ const express = require("express"),
 	mongodb = require("./mongo.js").Mongodb,
 	redisClient = require("./redis.js").redisClient;
 
+require('app-root-dir').set(__dirname);
+
 const app = express();
 
 const eventsListener = redisClient.createAnotherClient();

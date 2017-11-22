@@ -11,8 +11,9 @@
 const MongoDriver = require("mongodb"),
     MongoClient = MongoDriver.MongoClient,
     ObjectId = MongoDriver.ObjectId,
+    appRootDir = require('app-root-dir').get(),
     assert = require("assert"),
-    config = require("./config.js");
+    config = require(appRootDir + "/config.js");
 
 let Mongodb = {};
 let UsersCollection = "users";

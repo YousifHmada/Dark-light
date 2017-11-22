@@ -1,8 +1,11 @@
 const express = require("express"),
 	mongodb = require("./mongo.js").Mongodb,
 	socketIO = require("socket.io"),
-	redisClient = require("./redis.js").redisClient;
+	redisClient = require("./redis.js").redisClient,
+	hbs = require("hbs");
 
+/*seeting the absoule app-root-dir*/
+require('app-root-dir').set(__dirname);
 
 process.on('uncaughtException', function (err) {
   console.error(err);
@@ -10,8 +13,18 @@ process.on('uncaughtException', function (err) {
 });
 
 const app = express();
+
+/*setting up the templating engine*/
+hbs.registerPartials(__dirname + '/views/partials');
+app.set('view engine', 'hbs');
+
+/*setting up the public folder*/
 app.use(express.static('public'));
+
+/*setting up the server*/
 const server = app.listen(3000);
+
+/*organizing the sockets*/
 io = socketIO(server);
 
 const sockets = [];
@@ -88,51 +101,4 @@ app.use((req, res, next)=>{
 	next();
 });
 
-app.get('/', (req, res)=>{
-	mongodb.find('users',{})
-	.then((results)=>{
-		res.status(200).send({results})
-	})
-	.catch((err)=>{
-		console.log(err.body);
-		res.status(400).send(err.body)
-	});
-});
-
-
-app.get('/:senderId/notify/one/:receiverId/:message', (req, res)=>{
-	redisClient.publish('parse_notifications',JSON.stringify({
-		type:'one',
-		body:{
-			senderId: req.params.senderId,
-			receiverId: req.params.receiverId,
-			message: req.params.message
-		}
-	}));
-	res.send('done');
-});
-
-app.get('/:senderId/notify/all/:message', (req, res)=>{
-	redisClient.publish('parse_notifications',JSON.stringify({
-		type:'user-friends',
-		body:{
-			userId: req.params.senderId,
-			message: req.params.message
-		}
-	}));
-	res.send('done');
-});
-
-app.get('/:senderId/notify/some/:message', (req, res)=>{
-	redisClient.publish('parse_notifications',JSON.stringify({
-		type:'multiple',
-		body:{
-			senderId: req.params.senderId,
-			receiverIds: [
-				1,4,5
-			],
-			message: req.params.message
-		}
-	}));
-	res.send('done');
-});
+app.use('/', require('./router/app_routes.js'))

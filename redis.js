@@ -9,7 +9,9 @@
 */
 
 const redis = require("redis"),
-	config = require("./config.js");
+	appRootDir = require('app-root-dir').get(),
+	config = require(appRootDir + "/config.js");
+
 
 redisClient = redis.createClient(config.redis.port, config.redis.host);
 
